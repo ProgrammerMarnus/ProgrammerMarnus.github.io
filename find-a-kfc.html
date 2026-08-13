@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Find a KFC</title>
+<link rel="stylesheet" href="styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Narrow:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="site-logo">
+      <img alt="KFC Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ6hFJRz1VmBCzfdtykog5YssPmrRMQZKCgd2Y8kbYIJJUbdKtz4qJASuQ01cb4jg9j5wnTkKPjqVrdP13pwSpxaH_qiA8iINsk22W_aXlTcW5OgYNoYy_Rb5rT10q-wwcQ8Ztji0X8-ccwn5D1bHIFH1HCsstvfas99SEeI1jcFAGZ85wZMtJKxhZh63494NThsbAqS0y8l0UPsnyRJTxK_bzOHzLT_JBKxbVR3d63-u-LQzYaueK" />
+    </div>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="menu.html">Menu</a>
+      <a href="deals.html">Deals</a>
+      <a href="find-a-kfc.html" aria-current="page">Find a KFC</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-primary header-order">Order Now</button>
+      <div class="avatar"><span class="material-symbols-outlined">person</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="locate-hero">
+    <div class="locate-hero__bg" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuAiRu8GHefHvXy2iYWD091uAQEQAG9gQ83HrzvOG6CmFZPobZeyTd_P-56ZXPbG6h9XhTTPGCJLVF7RF8EGhlgqnQoezWrxNkAaxLHEdFR5euaVNfnxAvWAuY2m0f3bDEb-t9DIkthvhykiMEhaOfBL7oIxCK2i30HT_IKdjOGE-p3yhCMErmOof3zV6Ye5TwpnVr7E3xWfZt91MFBCWkOU-dBxGb0MnLeUWxXGW4toppfCx9kK50kt')"></div>
+    <div class="locate-hero__inner">
+      <h1 class="locate-hero__title">Find Your Nearest <span class="highlight">KFC</span></h1>
+      <p class="locate-hero__body">Craving that Original Recipe? Enter your location below to find the closest bucket of crispy, golden chicken.</p>
+
+      <form class="locate-search" onsubmit="return false;">
+        <span class="material-symbols-outlined">location_on</span>
+        <input type="text" id="locationSearch" placeholder="Enter your city or zip code" />
+        <button type="submit">Search Locations</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="locate-layout">
+    <div class="locate-map">
+      <div class="locate-map__bg" style="background-image:url('https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg')"></div>
+      <div class="locate-map__controls">
+        <button class="map-btn"><span class="material-symbols-outlined">add</span></button>
+        <button class="map-btn"><span class="material-symbols-outlined">remove</span></button>
+      </div>
+      <button class="map-btn map-btn--locate"><span class="material-symbols-outlined">my_location</span></button>
+    </div>
+
+    <div class="locate-results">
+      <div class="locate-results__header">
+        <h2 class="locate-results__title">Nearby <span class="highlight">Locations</span></h2>
+        <span class="locate-results__count">4 FOUND</span>
+      </div>
+
+      <div class="locate-results__list" id="restaurantList">
+
+        <div class="location-card">
+          <div class="location-card__top">
+            <div>
+              <h3 class="location-card__name">Downtown Central</h3>
+              <p class="location-card__address">123 Main Street, Cityville, ST 12345</p>
+            </div>
+            <span class="location-card__distance">0.8 MI</span>
+          </div>
+          <div class="location-card__status">
+            <span class="status-dot"></span>
+            <span class="status-label">Open Now</span>
+            <span class="status-note">Closes at 11:00 PM</span>
+          </div>
+          <div class="location-card__actions">
+            <button class="btn btn-primary"><span class="material-symbols-outlined">directions</span> Directions</button>
+            <button class="btn btn-outline"><span class="material-symbols-outlined">restaurant_menu</span> Order Here</button>
+          </div>
+        </div>
+
+        <div class="location-card location-card--dim">
+          <div class="location-card__top">
+            <div>
+              <h3 class="location-card__name">Westside Plaza</h3>
+              <p class="location-card__address">456 West Ave, Cityville, ST 12346</p>
+            </div>
+            <span class="location-card__distance location-card__distance--muted">2.4 MI</span>
+          </div>
+          <div class="location-card__status">
+            <span class="status-dot"></span>
+            <span class="status-label">Open Now</span>
+            <span class="status-note">Closes at 10:00 PM</span>
+          </div>
+          <div class="location-card__actions">
+            <button class="btn btn-primary"><span class="material-symbols-outlined">directions</span> Directions</button>
+            <button class="btn btn-outline"><span class="material-symbols-outlined">restaurant_menu</span> Order Here</button>
+          </div>
+        </div>
+
+        <div class="location-card location-card--dim location-card--disabled">
+          <div class="location-card__top">
+            <div>
+              <h3 class="location-card__name">North Hills Drive-Thru</h3>
+              <p class="location-card__address">789 North Blvd, Cityville, ST 12347</p>
+            </div>
+            <span class="location-card__distance location-card__distance--muted">4.1 MI</span>
+          </div>
+          <div class="location-card__status">
+            <span class="status-dot status-dot--closed"></span>
+            <span class="status-label status-label--closed">Closed</span>
+            <span class="status-note">Opens tomorrow at 10:30 AM</span>
+          </div>
+          <div class="location-card__actions">
+            <button class="btn btn-primary"><span class="material-symbols-outlined">directions</span> Directions</button>
+            <button class="btn btn-outline"><span class="material-symbols-outlined">restaurant_menu</span> Order Here</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="footer-social">
+      <span class="material-symbols-outlined">qr_code_2</span>
+      <span class="material-symbols-outlined">camera</span>
+      <span class="material-symbols-outlined">play_circle</span>
+    </div>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Nutrition Info</a>
+      <a href="#">Contact Us</a>
+    </div>
+    <div class="footer-copy">© 2026 KFC. ALL RIGHTS RESERVED.</div>
+  </div>
+</footer>
+
+<script src="find-a-kfc.js"></script>
+</body>
+</html>
