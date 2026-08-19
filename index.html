@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat Room</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <div>
+        <h1>Chat Room</h1>
+        <p class="muted">Real-time chat via WebSockets</p>
+      </div>
+      <div class="status" id="connStatus">Connecting…</div>
+    </header>
+
+    <section class="panel">
+      <div class="messages" id="messages" aria-live="polite"></div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <input id="nameInput" maxlength="24" placeholder="Your name" required />
+        <input id="msgInput" maxlength="1000" placeholder="Type a message…" required />
+        <button type="submit">Send</button>
+      </form>
+
+      <div class="hint">
+        <span class="muted">Tip:</span> Messages appear instantly to everyone connected.
+      </div>
+    </section>
+  </main>
+
+  <!-- Socket.IO client -->
+  <!-- IMPORTANT: This script needs the server URL. Replace with your Render service URL in app.js -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
