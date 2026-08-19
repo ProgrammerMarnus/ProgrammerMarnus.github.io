@@ -1,32 +1,50 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { WebSocketServer, WebSocket } from 'ws';
 
-const wss = new WebSocketServer({ port: 8080 });
+const port = process.env.PORT || 8080;
+const historyFile = new URL('./chat-history.json', import.meta.url);
+const maxHistory = 100;
+
+let messageHistory = [];
+if (existsSync(historyFile)) {
+  try {
+    const savedHistory = JSON.parse(readFileSync(historyFile, 'utf8'));
+    if (Array.isArray(savedHistory)) messageHistory = savedHistory.slice(-maxHistory);
+  } catch (error) {
+    console.error('Could not load chat history:', error.message);
+  }
+}
+
+const wss = new WebSocketServer({ port: port });
 
 wss.on('connection', (ws) => {
   console.log(`\n======================================`);
   console.log(`Client joined! Total active users: ${wss.clients.size}`);
   console.log(`======================================\n`);
 
-  ws.on('message', (rawData) => {
-    // 1. Always safely decode the raw network buffer first
-    const stringData = new TextDecoder().decode(rawData);
-    
-    // 2. Wrap everything in a try...catch block to prevent JSON parsing crashes
-    try {
-      // If it's a JSON object, parse it (or just log it)
-      const parsedData = JSON.parse(stringData);
-      console.log('Received valid JSON:', parsedData);
-    } catch (e) {
-      // If it's NOT JSON (like "Hi" or "Hello Server!"), it safely falls back here
-      console.log(`Received plain text string: "${stringData}"`);
-    }
+  ws.send(JSON.stringify({ type: 'history', messages: messageHistory }));
 
-    // 3. Broadcast the raw string out to all other open tabs
-    wss.clients.forEach((client) => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(stringData); 
-      }
-    });
+  ws.on('message', (rawData) => {
+    const stringData = rawData.toString();
+
+    try {
+      const parsedData = JSON.parse(stringData);
+      const name = typeof parsedData.name === 'string' ? parsedData.name.trim().slice(0, 30) : '';
+      const text = typeof parsedData.text === 'string' ? parsedData.text.trim().slice(0, 500) : '';
+      if (!name || !text) return;
+
+      const message = { name, text, timestamp: new Date().toISOString() };
+      messageHistory = [...messageHistory, message].slice(-maxHistory);
+      writeFileSync(historyFile, JSON.stringify(messageHistory, null, 2));
+
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: 'message', message }));
+        }
+      });
+    } catch (error) {
+      console.error('Ignoring invalid message:', error.message);
+    }
   });
 
   ws.on('close', () => {

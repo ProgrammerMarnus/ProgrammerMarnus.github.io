@@ -11,7 +11,8 @@
 </head>
 <body>
     <h3>Real-Time Room</h3>
-    <input type="text" id="chatbox" placeholder="Type a message..." />
+    <input type="text" id="namebox" placeholder="Your name" maxlength="30" />
+    <input type="text" id="chatbox" placeholder="Type a message..." maxlength="500" />
     <button onclick="sendMessage()">Send</button>
     
     <div id="messages"></div>
@@ -19,26 +20,42 @@
     <script>
         const socket = new WebSocket('wss://chat-room-yjg6.onrender.com');
         const messagesDiv = document.getElementById('messages');
+        const namebox = document.getElementById('namebox');
         const chatbox = document.getElementById('chatbox');
 
-        // Handle incoming broadcasts from other tabs
+        namebox.value = localStorage.getItem('chatName') || '';
+
+        function addMessage(message) {
+            const messageElement = document.createElement('p');
+            const nameElement = document.createElement('b');
+            nameElement.textContent = `${message.name}: `;
+            messageElement.append(nameElement, document.createTextNode(message.text));
+            messagesDiv.appendChild(messageElement);
+        }
+
         socket.addEventListener('message', (event) => {
-            messagesDiv.innerHTML += `<p style="color: blue;"><b>Peer:</b> ${event.data}</p>`;
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'history') {
+                    data.messages.forEach(addMessage);
+                } else if (data.type === 'message') {
+                    addMessage(data.message);
+                }
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                console.error('Could not read server message:', error);
+            }
         });
 
         function sendMessage() {
+            const name = namebox.value.trim();
             const text = chatbox.value.trim();
-            if (!text) return;
+            if (!name || !text || socket.readyState !== WebSocket.OPEN) return;
 
-            // 1. Send the raw string to the server
-            socket.send(text);
+            localStorage.setItem('chatName', name);
+            socket.send(JSON.stringify({ name, text }));
 
-            // 2. Immediately append your own message locally to your screen
-            messagesDiv.innerHTML += `<p style="color: green;"><b>You:</b> ${text}</p>`;
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            chatbox.value = ''; // Clear input field
+            chatbox.value = '';
         }
 
         // Allow pressing "Enter" to send
