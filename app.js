@@ -1,4 +1,4 @@
-const SERVER_URL = "https://YOUR-RENDER-SERVICE.onrender.com"; // <-- change me
+const SERVER_URL = "https://chat-room-aadn.onrender.com"; // <-- change me
 
 const socket = io(SERVER_URL, {
   transports: ["websocket"],
