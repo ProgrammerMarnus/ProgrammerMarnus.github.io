@@ -47,6 +47,8 @@
         input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #d65a3a22; }
         button { padding: 0 20px; border: 0; border-radius: 4px; color: #fff; background: var(--accent); font: 700 .9rem Arial, sans-serif; cursor: pointer; }
         button:hover { background: var(--accent-dark); }
+        .clear-button { display: block; margin: 12px 14px 0 auto; padding: 8px 12px; border: 1px solid var(--line); color: var(--muted); background: transparent; font-size: .75rem; }
+        .clear-button:hover { border-color: var(--accent); color: var(--accent-dark); background: transparent; }
         #status { min-height: 18px; margin: 10px 2px 0; color: var(--muted); font: .8rem Arial, sans-serif; }
 
         @media (max-width: 600px) {
@@ -70,6 +72,7 @@
 
         <section class="chat-panel" aria-label="Chat room">
             <div id="messages" aria-live="polite"></div>
+            <button type="button" class="clear-button" id="clearButton">Clear chat</button>
             <form class="composer" id="composer">
                 <input type="text" id="namebox" placeholder="Your name" maxlength="30" aria-label="Your name" required />
                 <input type="text" id="chatbox" placeholder="Write a message..." maxlength="500" aria-label="Message" required />
@@ -85,6 +88,7 @@
         const namebox = document.getElementById('namebox');
         const chatbox = document.getElementById('chatbox');
         const composer = document.getElementById('composer');
+        const clearButton = document.getElementById('clearButton');
         const status = document.getElementById('status');
 
         namebox.value = localStorage.getItem('chatName') || '';
@@ -106,6 +110,9 @@
                 } else if (data.type === 'message') {
                     addMessage(data.message);
                     status.textContent = '';
+                } else if (data.type === 'historyCleared') {
+                    messagesDiv.replaceChildren();
+                    status.textContent = 'Chat history cleared.';
                 }
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             } catch (error) {
@@ -127,6 +134,13 @@
         composer.addEventListener('submit', (event) => {
             event.preventDefault();
             sendMessage();
+        });
+
+        clearButton.addEventListener('click', () => {
+            if (socket.readyState !== WebSocket.OPEN) return;
+            if (!confirm('Clear the chat history for everyone?')) return;
+
+            socket.send(JSON.stringify({ type: 'clearHistory' }));
         });
     </script>
 </body>
