@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wire — Simple WebChat</title>
+<style>
+  :root {
+    --ink: #1b1f23;
+    --paper: #f6f4ef;
+    --panel: #ffffff;
+    --line: #dcd7cb;
+    --accent: #2f5d50;
+    --accent-soft: #e3ece8;
+    --danger: #a4402f;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+  }
+
+  header.top h1 {
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  header.top h1 .mark {
+    color: var(--accent);
+  }
+
+  .status {
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b6459;
+  }
+
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+    display: inline-block;
+  }
+
+  .status.connected .dot { background: var(--accent); }
+  .status.connecting .dot { background: #c9a13b; }
+
+  .connect-bar {
+    display: flex;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 10px;
+  }
+
+  .connect-bar input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .connect-bar input:focus, textarea:focus, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .connect-bar button, .send-row button {
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 16px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+
+  .connect-bar button:hover, .send-row button:hover { background: var(--accent); border-color: var(--accent); }
+  .connect-bar button:disabled, .send-row button:disabled {
+    background: #b9b3a6; border-color: #b9b3a6; cursor: not-allowed;
+  }
+
+  .name-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #6b6459;
+  }
+
+  .name-row input {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 6px 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    width: 140px;
+  }
+
+  main.log {
+    flex: 1;
+    min-height: 380px;
+    max-height: 55vh;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  main.log:empty::before {
+    content: "No messages yet. Connect to a server to start chatting.";
+    color: #a29c8e;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .msg {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .msg .who {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .msg.self .who { color: #6b6459; }
+
+  .msg .time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #b9b3a6;
+    white-space: nowrap;
+  }
+
+  .msg .body { flex: 1; word-break: break-word; }
+
+  .msg.system .body {
+    color: #8a8375;
+    font-style: italic;
+  }
+
+  .msg .flag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+
+  .send-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .send-row textarea {
+    flex: 1;
+    resize: none;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 10px;
+    font-family: var(--sans);
+    font-size: 14px;
+    height: 44px;
+    line-height: 1.3;
+  }
+
+  footer.note {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #a29c8e;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <h1>Wire<span class="mark">.</span>chat</h1>
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">disconnected</span></div>
+  </header>
+
+  <div class="connect-bar">
+    <input id="wsUrl" type="text" placeholder="wss://your-server.example.com/socket" value="" />
+    <button id="connectBtn">Connect</button>
+  </div>
+
+  <div class="name-row">
+    <label for="name">name:</label>
+    <input id="name" type="text" placeholder="guest" maxlength="24" />
+  </div>
+
+  <main class="log" id="log"></main>
+
+  <div class="send-row">
+    <textarea id="msgInput" placeholder="Type a message… (Enter to send, Shift+Enter for newline)" disabled></textarea>
+    <button id="sendBtn" disabled>Send</button>
+  </div>
+
+  <footer class="note">Messages are filtered locally with bad-words-next before they're sent or shown.</footer>
+</div>
+
+<script type="module">
+  import BadWordsNext from "https://esm.sh/bad-words-next@4";
+  import en from "https://esm.sh/bad-words-next@4/lib/en";
+
+  const badwords = new BadWordsNext({ data: en });
+
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $("status");
+  const statusText = $("statusText");
+  const wsUrlInput = $("wsUrl");
+  const connectBtn = $("connectBtn");
+  const nameInput = $("name");
+  const log = $("log");
+  const msgInput = $("msgInput");
+  const sendBtn = $("sendBtn");
+
+  let socket = null;
+
+  function setStatus(state, label) {
+    statusEl.className = "status " + state;
+    statusText.textContent = label;
+  }
+
+  function timeNow() {
+    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function addMessage({ who, text, self = false, system = false, flagged = false }) {
+    const row = document.createElement("div");
+    row.className = "msg" + (self ? " self" : "") + (system ? " system" : "");
+
+    const whoEl = document.createElement("span");
+    whoEl.className = "who";
+    whoEl.textContent = system ? "" : who;
+
+    const bodyEl = document.createElement("span");
+    bodyEl.className = "body";
+    bodyEl.textContent = text;
+
+    const timeEl = document.createElement("span");
+    timeEl.className = "time";
+    timeEl.textContent = timeNow();
+
+    row.appendChild(whoEl);
+    row.appendChild(bodyEl);
+    if (flagged) {
+      const flag = document.createElement("span");
+      flag.className = "flag";
+      flag.textContent = "filtered";
+      row.appendChild(flag);
+    }
+    row.appendChild(timeEl);
+
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function setChatEnabled(enabled) {
+    msgInput.disabled = !enabled;
+    sendBtn.disabled = !enabled;
+  }
+
+  function connect() {
+    const url = wsUrlInput.value.trim();
+    if (!url) {
+      addMessage({ text: "Enter a wss:// URL before connecting.", system: true });
+      return;
+    }
+    if (!/^wss?:\/\//i.test(url)) {
+      addMessage({ text: "URL must start with ws:// or wss://", system: true });
+      return;
+    }
+
+    if (socket) {
+      socket.close();
+      socket = null;
+    }
+
+    setStatus("connecting", "connecting…");
+    connectBtn.textContent = "Cancel";
+
+    try {
+      socket = new WebSocket(url);
+    } catch (err) {
+      setStatus("", "disconnected");
+      connectBtn.textContent = "Connect";
+      addMessage({ text: "Could not open connection: " + err.message, system: true });
+      return;
+    }
+
+    socket.addEventListener("open", () => {
+      setStatus("connected", "connected");
+      connectBtn.textContent = "Disconnect";
+      setChatEnabled(true);
+      addMessage({ text: "Connected to " + url, system: true });
+    });
+
+    socket.addEventListener("message", (event) => {
+      let text = typeof event.data === "string" ? event.data : "[binary message]";
+      let who = "them";
+
+      // Support either plain-text messages or {name, text} JSON payloads
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed === "object") {
+          who = parsed.name || who;
+          text = parsed.text ?? text;
+        }
+      } catch { /* plain text, leave as-is */ }
+
+      const flagged = badwords.check(text);
+      const clean = flagged ? badwords.filter(text) : text;
+      addMessage({ who, text: clean, flagged });
+    });
+
+    socket.addEventListener("close", () => {
+      setStatus("", "disconnected");
+      connectBtn.textContent = "Connect";
+      setChatEnabled(false);
+      addMessage({ text: "Connection closed.", system: true });
+      socket = null;
+    });
+
+    socket.addEventListener("error", () => {
+      addMessage({ text: "Connection error.", system: true });
+    });
+  }
+
+  function disconnect() {
+    if (socket) socket.close();
+  }
+
+  connectBtn.addEventListener("click", () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      disconnect();
+    } else if (socket && socket.readyState === WebSocket.CONNECTING) {
+      socket.close();
+      setStatus("", "disconnected");
+      connectBtn.textContent = "Connect";
+    } else {
+      connect();
+    }
+  });
+
+  function sendMessage() {
+    const raw = msgInput.value.trim();
+    if (!raw || !socket || socket.readyState !== WebSocket.OPEN) return;
+
+    const flagged = badwords.check(raw);
+    const clean = flagged ? badwords.filter(raw) : raw;
+    const name = nameInput.value.trim() || "guest";
+
+    socket.send(JSON.stringify({ name, text: clean }));
+    addMessage({ who: name, text: clean, self: true, flagged });
+
+    msgInput.value = "";
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  msgInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  addMessage({ text: "Enter a WebSocket (wss://) URL above and hit Connect.", system: true });
+</script>
+</body>
+</html>
