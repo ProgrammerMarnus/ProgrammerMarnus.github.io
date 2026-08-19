@@ -4,6 +4,11 @@ import { WebSocketServer, WebSocket } from 'ws';
 const port = process.env.PORT || 8080;
 const historyFile = new URL('./chat-history.json', import.meta.url);
 const maxHistory = 100;
+const profanityPattern = /\b(?:arse|asshole|bastard|bitch\w*|bullshit|crap|damn\w*|dick\w*|fuck\w*|hell|idiot\w*|piss\w*|shit\w*|slut\w*|stupid\w*|whore\w*)\b/gi;
+
+function filterProfanity(value) {
+  return value.replace(profanityPattern, (word) => `${word[0]}${'*'.repeat(Math.max(2, word.length - 1))}`);
+}
 
 let messageHistory = [];
 if (existsSync(historyFile)) {
@@ -29,8 +34,8 @@ wss.on('connection', (ws) => {
 
     try {
       const parsedData = JSON.parse(stringData);
-      const name = typeof parsedData.name === 'string' ? parsedData.name.trim().slice(0, 30) : '';
-      const text = typeof parsedData.text === 'string' ? parsedData.text.trim().slice(0, 500) : '';
+      const name = typeof parsedData.name === 'string' ? filterProfanity(parsedData.name.trim().slice(0, 30)) : '';
+      const text = typeof parsedData.text === 'string' ? filterProfanity(parsedData.text.trim().slice(0, 500)) : '';
       if (!name || !text) return;
 
       const message = { name, text, timestamp: new Date().toISOString() };
