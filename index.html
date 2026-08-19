@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Multi-Client Chat</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #chatbox { width: 300px; height: 20px; }
+        #messages { border: 1px solid #ccc; height: 200px; overflow-y: scroll; margin-top: 10px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h3>Real-Time Room</h3>
+    <input type="text" id="chatbox" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+    
+    <div id="messages"></div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8080');
+        const messagesDiv = document.getElementById('messages');
+        const chatbox = document.getElementById('chatbox');
+
+        // Handle incoming broadcasts from other tabs
+        socket.addEventListener('message', (event) => {
+            messagesDiv.innerHTML += `<p style="color: blue;"><b>Peer:</b> ${event.data}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
+        });
+
+        function sendMessage() {
+            const text = chatbox.value.trim();
+            if (!text) return;
+
+            // 1. Send the raw string to the server
+            socket.send(text);
+
+            // 2. Immediately append your own message locally to your screen
+            messagesDiv.innerHTML += `<p style="color: green;"><b>You:</b> ${text}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            chatbox.value = ''; // Clear input field
+        }
+
+        // Allow pressing "Enter" to send
+        chatbox.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
