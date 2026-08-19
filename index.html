@@ -72,7 +72,7 @@
 
         <section class="chat-panel" aria-label="Chat room">
             <div id="messages" aria-live="polite"></div>
-            <button type="button" class="clear-button" id="clearButton">Clear chat</button>
+            <button type="button" class="clear-button" id="clearButton" aria-label="Clear chat history">Clear chat history</button>
             <form class="composer" id="composer">
                 <input type="text" id="namebox" placeholder="Your name" maxlength="30" aria-label="Your name" required />
                 <input type="text" id="chatbox" placeholder="Write a message..." maxlength="500" aria-label="Message" required />
@@ -96,6 +96,12 @@
         function addMessage(message) {
             const messageElement = document.createElement('p');
             const nameElement = document.createElement('b');
+            let nameHash = 0;
+            for (const character of message.name) {
+                nameHash = ((nameHash << 5) - nameHash) + character.codePointAt(0);
+                nameHash |= 0;
+            }
+            nameElement.style.color = `hsl(${Math.abs(nameHash) % 360} 58% 34%)`;
             nameElement.textContent = `${message.name}: `;
             messageElement.append(nameElement, document.createTextNode(message.text));
             messagesDiv.appendChild(messageElement);
